@@ -1,0 +1,36 @@
+# Kubernetes runs and maintains one copy of our Go Management API.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mini-cloud-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mini-cloud-api
+  template:
+    metadata:
+      labels:
+        app: mini-cloud-api
+    spec:
+      containers:
+        - name: api
+          image: mini-cloud-api:v0.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+---
+# Gives other Pods a stable name to reach the API.
+apiVersion: v1
+kind: Service
+metadata:
+  name: mini-cloud-api
+spec:
+  type: ClusterIP
+  selector:
+    app: mini-cloud-api
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
