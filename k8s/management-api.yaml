@@ -15,10 +15,28 @@ spec:
     spec:
       containers:
         - name: api
-          image: mini-cloud-api:v0.1
+          image: mini-cloud-api:v0.2
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
+          env:
+            # 'postgres' resolves to the PostgreSQL Service inside Kubernetes.
+            - name: PGHOST
+              value: postgres
+            - name: PGPORT
+              value: "5432"
+            - name: PGUSER
+              value: mini_cloud
+            - name: PGDATABASE
+              value: mini_cloud
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: password
+            # Suitable for this local kind demo; use TLS in a real deployment.
+            - name: PGSSLMODE
+              value: disable
 ---
 # Gives other Pods a stable name to reach the API.
 apiVersion: v1
