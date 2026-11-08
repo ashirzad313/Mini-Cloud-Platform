@@ -45,11 +45,14 @@ func main() {
 		})
 	})
 
+	// Our first request from the Management API to the Kubernetes API server.
+	registerClusterRoutes(mux)
+
 	log.Println("Management API listening on :8080")
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }
 
-func writeJSON(w http.ResponseWriter, status int, body map[string]string) {
+func writeJSON(w http.ResponseWriter, status int, body any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	if err := json.NewEncoder(w).Encode(body); err != nil {
