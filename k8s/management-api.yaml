@@ -1,3 +1,32 @@
+# Least privilege: the Go API gets its own identity and may only list Pods
+# in this namespace. It cannot create, delete, or modify workloads yet.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mini-cloud-api
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: mini-cloud-pod-reader
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: mini-cloud-pod-reader
+subjects:
+  - kind: ServiceAccount
+    name: mini-cloud-api
+    namespace: default
+roleRef:
+  kind: Role
+  name: mini-cloud-pod-reader
+  apiGroup: rbac.authorization.k8s.io
+---
 # Kubernetes runs and maintains one copy of our Go Management API.
 apiVersion: apps/v1
 kind: Deployment
@@ -13,9 +42,10 @@ spec:
       labels:
         app: mini-cloud-api
     spec:
+      serviceAccountName: mini-cloud-api
       containers:
         - name: api
-          image: mini-cloud-api:v0.2
+          image: mini-cloud-api:v0.3
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
