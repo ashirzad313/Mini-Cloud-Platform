@@ -3,7 +3,7 @@ FROM golang:1.25-alpine AS build
 WORKDIR /src
 COPY go.mod ./
 COPY cmd/ ./cmd/
-RUN CGO_ENABLED=0 go build -o /api ./cmd/api
+RUN go mod tidy && CGO_ENABLED=0 go build -trimpath -o /api ./cmd/api
 
 # Run the executable without including the Go toolchain.
 FROM alpine:3.22
